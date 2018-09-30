@@ -1,335 +1,229 @@
 package CSC4380Hnguyen154Assignment4;
 
-import java.awt.Graphics;
-import javax.swing.JOptionPane;
-import CSC4380Hnguyen154Assignment4.*;
-import java.awt.Color;
+
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Insets;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Random;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
+import java.awt.Color;
+import javax.swing.ButtonGroup;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 
-public class Frame extends javax.swing.JFrame {
-   
-    public Frame() {
-        initComponents();
-      
+/**
+ *
+ * @author honghao97
+ */
+class Frame extends JFrame {
+    private JMenuBar menuBar;
+    private JMenu file, help;
+    private JMenuItem exit, about;
+    private JPanel contentPane;
+    private Panel imageContent;
+    private JButton source;
+    ButtonGroup group;
+    JRadioButton line, rect;
+    int coor1, coor2, coor3, coor4;
+    
+    
+    public static void main (String[]args){
+        EventQueue.invokeLater(new Runnable(){
+            public void run ()
+            {
+                try{
+                    Frame f = new Frame();
+                    f.setVisible(true);
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+    
+    public Frame()
+    {
+        //Set Frame
+        setTitle("Graphics GUI");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100,100,600,500);
+        
+        //Set Menu Bar
+        menuBar = new JMenuBar();
+        //Build File Menu
+        file = new JMenu ("File");
+        exit = new JMenuItem ("Exit");
+        exit.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                System.exit(0);
+            }
+        });
+        file.add(exit);
+        
+        //Build Help Menu
+        help = new JMenu ("Help");
+        about = new JMenuItem("About");
+        about.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                JOptionPane.showMessageDialog(about,
+                    "<html><center><font size='10'>"
+                            + "Welcome to the Graphic GUI. "
+                            + "<br> You can draw a rectangle or a line by simply selecting the corresonding radio button and click \"Go\". "
+                            + "<br> You can reposition the shape with the new coordinates (Numbers ONLY)."
+                            + "<br> After inputting the coordinates, click redraw to change the position.</font></html> ");
+            }
+        });
+        help.add(about);
+        
+        menuBar.add(file);
+        menuBar.add(help);
+        setJMenuBar(menuBar);
+        
+        //mainPanel can break down to imagePanel and controlPanel       
+        contentPane = new JPanel();
+        contentPane.setBorder(new EmptyBorder(5,5,5,5));
+        contentPane.setLayout(new BorderLayout(0,0));
+        setContentPane(contentPane);
         centerWindow(this);
         
-        setTitle("Graphics GUI");
+        //Panel for Image
+        imageContent = new Panel();
+        contentPane.add(imageContent, BorderLayout.CENTER); 
+        
+        //Create control panel
+        JPanel controlContent = createControlPanel();
+        contentPane.add(controlContent, BorderLayout.SOUTH);
+        
+        
         
     }
 
-    public void centerWindow(Frame frame){
+    private JPanel createControlPanel() {
+        //Panel for control
+        JPanel controlContent = new JPanel();
+        
+        //TextField for coordinates
+        JTextField x1 = new JTextField("x1");
+        controlContent.add(x1);
+        JTextField y1 = new JTextField("y1");
+        controlContent.add(y1);
+        JTextField x2 = new JTextField("x2");
+        controlContent.add(x2);
+        JTextField y2 = new JTextField("y2");
+        controlContent.add(y2);
+       
+        //Group of radio buttons for line or rectangle
+       group = new ButtonGroup();
+       line = new JRadioButton("Line");
+       rect = new JRadioButton("Rectangle");
+       line.setSelected(true);
+       group.add(line);
+       group.add(rect);
+       controlContent.add(line);
+       controlContent.add(rect);
+        
+        //Button for drawing
+        JButton goButton = new JButton("Go");
+        controlContent.add(goButton);
+        //Run the image after Radio Button is being selected
+        goButton.addActionListener(new ActionListener(){
+           public void actionPerformed(ActionEvent e){
+                Random r = new Random();
+                //Random coordinate for Line            
+                int a = r.nextInt(600-0+1)+0;
+                int b = r.nextInt(300-0+1)+0;
+                int c = r.nextInt(300-0+1)+0;
+                int d = r.nextInt(600-0+1)+0;
+                
+                if(line.isSelected()){
+                    imageContent.addLine(a,b,c,d);
+                    //goButton.setEnabled(false);
+                    //goButton.setBackground(Color.RED);
+                }
+                
+                //Random coordinate for Rectangle  
+                Dimension size = getSize();
+                Insets insets = getInsets();
+                int w = size.width - insets.left - insets.right;
+                int h = size.height - insets.top - insets.bottom;
+                int x = Math.abs(r.nextInt()) % w;
+                int y = Math.abs(r.nextInt()) % h;
+                
+                if(rect.isSelected()){
+                    imageContent.addRect(x,y,x,y);
+                    //goButton.setEnabled(false);
+                    //goButton.setBackground(Color.RED);
+                }
+           }
+           
+        });
+        
+        
+        JButton redrawButton = new JButton("Redraw");
+        controlContent.add(redrawButton);
+        redrawButton.addActionListener(new ActionListener(){
+           public void actionPerformed(ActionEvent e){
+                //User's input for coordinates for Line or Rectangle             
+                
+                try{
+                    coor1 = Integer.parseInt(x1.getText());
+                    coor2 = Integer.parseInt(y1.getText());
+                    coor3 = Integer.parseInt(x2.getText());
+                    coor4 = Integer.parseInt(y2.getText());
+                }catch(NumberFormatException ex){
+                    JOptionPane.showMessageDialog(redrawButton,"Please only input numbers!","Invalid Input", JOptionPane.INFORMATION_MESSAGE);
+                }
+                if(line.isSelected()){
+                        imageContent.addLine(coor1,coor2,coor3,coor4); 
+                }
+                    
+                if(rect.isSelected()){
+                        imageContent.addRect(coor1,coor2,coor3,coor4);
+                }
+           }
+           
+        });     
+        
+        JButton clearButton = new JButton("Clear");
+        controlContent.add(clearButton);
+        clearButton.addActionListener(new ActionListener(){
+           public void actionPerformed(ActionEvent e){
+               if ( JOptionPane.showConfirmDialog(null, "Are you sure you want to clear all?") == JOptionPane.YES_OPTION )
+               {
+                    imageContent.removeAll();
+                    imageContent.revalidate();
+                    imageContent.repaint();
+                    
+               }
+           }
+        }); 
+        
+        
+        return controlContent;
+    }
+    
+   
+    private void centerWindow(Frame f){
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (int) ((screen.getWidth() - getWidth()) /2);
         int y = (int) ((screen.getHeight() -getHeight()) /2);
         setLocation(x, y); 
     }
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        label1 = new java.awt.Label();
-        labelShape = new java.awt.Label();
-        rec = new java.awt.Button();
-        line = new java.awt.Button();
-        labelCoor = new java.awt.Label();
-        x1 = new java.awt.TextField();
-        x2 = new java.awt.TextField();
-        y1 = new java.awt.TextField();
-        y2 = new java.awt.TextField();
-        line2 = new java.awt.Button();
-        rec2 = new java.awt.Button();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        file = new javax.swing.JMenu();
-        reset = new javax.swing.JMenuItem();
-        jSeparator1 = new javax.swing.JPopupMenu.Separator();
-        exit = new javax.swing.JMenuItem();
-        help = new javax.swing.JMenu();
-        about = new javax.swing.JMenuItem();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setBackground(new java.awt.Color(255, 153, 51));
-
-        label1.setFont(new java.awt.Font("Arial Black", 1, 24)); // NOI18N
-        label1.setText("WELCOME TO GRAPHIC GUI");
-
-        labelShape.setFont(new java.awt.Font("Courier New", 0, 14)); // NOI18N
-        labelShape.setText("CHOOSE A SHAPE");
-
-        rec.setLabel("RECTANGLE");
-        rec.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                recActionPerformed(evt);
-            }
-        });
-
-        line.setActionCommand("LINE");
-        line.setLabel("LINE");
-        line.setName(""); // NOI18N
-        line.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lineActionPerformed(evt);
-            }
-        });
-
-        labelCoor.setFont(new java.awt.Font("Courier New", 0, 14)); // NOI18N
-        labelCoor.setName(""); // NOI18N
-        labelCoor.setText("INPUT NEW COORDINATES");
-
-        x1.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
-        x1.setFont(new java.awt.Font("Arial Black", 0, 12)); // NOI18N
-        x1.setText("X1");
-
-        x2.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
-        x2.setFont(new java.awt.Font("Arial Black", 0, 12)); // NOI18N
-        x2.setText("X2");
-
-        y1.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
-        y1.setFont(new java.awt.Font("Arial Black", 0, 12)); // NOI18N
-        y1.setText("Y1");
-
-        y2.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
-        y2.setFont(new java.awt.Font("Arial Black", 0, 12)); // NOI18N
-        y2.setText("Y2");
-
-        line2.setLabel("REDRAW LINE");
-        line2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                line2ActionPerformed(evt);
-            }
-        });
-
-        rec2.setLabel("REDRAW RECTANGLE");
-        rec2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                rec2ActionPerformed(evt);
-            }
-        });
-
-        file.setText("File");
-
-        reset.setText("Reset");
-        reset.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                resetActionPerformed(evt);
-            }
-        });
-        file.add(reset);
-        file.add(jSeparator1);
-
-        exit.setText("Exit");
-        exit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitActionPerformed(evt);
-            }
-        });
-        file.add(exit);
-
-        jMenuBar1.add(file);
-
-        help.setText("Help");
-
-        about.setText("About");
-        about.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                aboutActionPerformed(evt);
-            }
-        });
-        help.add(about);
-
-        jMenuBar1.add(help);
-
-        setJMenuBar(jMenuBar1);
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(49, 49, 49)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(labelShape, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(rec, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addComponent(x1, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addGap(20, 20, 20)
-                                            .addComponent(y1, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addComponent(x2, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addGap(20, 20, 20)
-                                            .addComponent(y2, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                .addGap(44, 44, 44)
-                                .addComponent(line, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(4, 4, 4)
-                                .addComponent(labelCoor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(96, 96, 96)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(line2, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(rec2, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(50, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(43, 43, 43)
-                .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(56, 56, 56)
-                .addComponent(labelShape, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rec, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(line, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(64, 64, 64)
-                .addComponent(labelCoor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(33, 33, 33)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(x1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(y1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(10, 10, 10)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(x2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(y2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(41, 41, 41)
-                .addComponent(rec2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(22, 22, 22)
-                .addComponent(line2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(51, Short.MAX_VALUE))
-        );
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    private void aboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutActionPerformed
-         JOptionPane.showMessageDialog(about,
-                "<html><center><font size='10'>"
-                        + "Welcome to the Graphic GUI. "
-                        + "<br> You can draw a rectangle or a line by simply clicking the buttons \"Rectangle\" or \"Line\". "
-                        + "<br> You can reposition the shape with the new coordinates."
-                        + "<br> After inputting the coordinates, click redraw to change the position."
-                        + "<br> Note: Rectangle only needs x1 and y2."
-                        + "<br> A line requires all 4 coordinates. </font></html> ");
-    }//GEN-LAST:event_aboutActionPerformed
-
-    private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
-        System.exit(0);
-    }//GEN-LAST:event_exitActionPerformed
-
-    private void recActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recActionPerformed
-       
-       RecMain s = new RecMain();
-       s.setVisible(true);
-    }//GEN-LAST:event_recActionPerformed
-
-    private void lineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lineActionPerformed
-        LineMain s = new LineMain();
-        s.setVisible(true);
-    }//GEN-LAST:event_lineActionPerformed
-
-    private void resetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetActionPerformed
-        x1.setText("x1");
-        x2.setText("x2");
-        y1.setText("y1");
-        y2.setText("y2");
-    }//GEN-LAST:event_resetActionPerformed
-
-    private void rec2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rec2ActionPerformed
-        int coor1 = Integer.parseInt(x1.getText());
-        int coor2 = Integer.parseInt(y1.getText());
-        //int coor3 = Integer.parseInt(x2.getText());
-        //int coor4 = Integer.parseInt(y2.getText());
-        
-        RecMain redo = new RecMain();
-        redo.repaint(coor1, coor2, 200, 200);
-        redo.setVisible(true);
-        
-        
-    }//GEN-LAST:event_rec2ActionPerformed
-
-    private void line2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_line2ActionPerformed
-        int coor1 = Integer.parseInt(x1.getText());
-        int coor2 = Integer.parseInt(y1.getText());
-        int coor3 = Integer.parseInt(x2.getText());
-        int coor4 = Integer.parseInt(y2.getText());
-        
-        LineMain redo = new LineMain();
-        redo.repaint(coor1, coor2, coor3, coor4);
-        redo.setVisible(true);
-    }//GEN-LAST:event_line2ActionPerformed
-        
-    
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Frame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Frame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Frame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Frame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Frame().setVisible(true);
-                
-            }
-        });
-        
-       
-    }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenuItem about;
-    private javax.swing.JMenuItem exit;
-    private javax.swing.JMenu file;
-    private javax.swing.JMenu help;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPopupMenu.Separator jSeparator1;
-    private java.awt.Label label1;
-    private java.awt.Label labelCoor;
-    private java.awt.Label labelShape;
-    private java.awt.Button line;
-    private java.awt.Button line2;
-    private java.awt.Button rec;
-    private java.awt.Button rec2;
-    private javax.swing.JMenuItem reset;
-    private java.awt.TextField x1;
-    private java.awt.TextField x2;
-    private java.awt.TextField y1;
-    private java.awt.TextField y2;
-    // End of variables declaration//GEN-END:variables
 }
