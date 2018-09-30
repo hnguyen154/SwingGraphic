@@ -1,3 +1,10 @@
+/* Name: Hao Nguyen
+ * Class: CSC 4380
+ * Title: Assignment 4 - Graphic GUI
+ * Date: September 30, 2018
+ * Campus ID: hnguyen154
+ */
+
 package CSC4380Hnguyen154Assignment4;
 
 
